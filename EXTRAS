@@ -1,1 +1,5 @@
 # Google Cloud Console - Maps API Key: AIzaSyAQ7cjyXO5qkbUA_QBIVvYtaNEse8i_IJA
+
+
+# Tentativa de url bem elaborado
+https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=41.4474278,-8.28276&radius=1500&type=%22restaurants%22=%22McDonalds%22&key=AIzaSyAQ7cjyXO5qkbUA_QBIVvYtaNEse8i_IJA
