@@ -3,3 +3,16 @@
 
 # Tentativa de url bem elaborado
 https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=41.4474278,-8.28276&radius=1500&type=%22restaurants%22=%22McDonalds%22&key=AIzaSyAQ7cjyXO5qkbUA_QBIVvYtaNEse8i_IJA
+
+
+
+
+## Ver foto da "photo_reference"
+https://lh3.googleusercontent.com/places/AAcXr8qgVZuTEyTIEGY8KRAHmH2hxSFrbjaLzXauILz1Z36GEQYrUnodn6ZkigML_Dxm1iOCRma-u71PwIAQn-XcSpTDEPJ3w8agiTs=s1600-w400
+
+
+
+\\ ZOOMS
+1- Radius 1k    - Zoom 14
+2- Radius 5k    - Zoom 12 
+3- Radius 10k   - Zoom 11

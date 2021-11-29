@@ -6,21 +6,20 @@ import 'package:mlocator/repositories/postos_repository.dart';
 import 'package:mlocator/widgets/posto_detalhes.dart';
 
 late Position CurrentUserPosition;
+late GoogleMapController mapsController;
 
 class PostosController extends ChangeNotifier {
   double lat = 0.0;
   double long = 0.0;
   String erro = '';
   Set<Marker> markers = Set<Marker>();
-  late GoogleMapController _mapsController;
 
   // PostosController() {
   //   getPosicao();
   // }
-  get mapsController => _mapsController;
 
   onMapCreated(GoogleMapController gmc) async {
-    _mapsController = gmc;
+    mapsController = gmc;
     getPosicao();
     loadPostos();
   }
@@ -53,7 +52,7 @@ class PostosController extends ChangeNotifier {
       Position posicao = await _posicaoAtual();
       lat = posicao.latitude;
       long = posicao.longitude;
-      _mapsController.animateCamera(CameraUpdate.newLatLng(LatLng(lat, long)));
+      mapsController.animateCamera(CameraUpdate.newLatLng(LatLng(lat, long)));
       CurrentUserPosition = posicao;
     } catch (e) {
       erro = e.toString();
