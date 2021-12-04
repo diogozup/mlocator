@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:mlocator/controllers/postos_controller.dart';
 import 'package:mlocator/helpers/AuxiliarStrings.dart';
 import 'package:mlocator/helpers/CustomDialogBox.dart';
+import 'package:mlocator/pages/tutorial.dart';
 import 'package:mlocator/services/nearby_location_api.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
@@ -22,6 +24,8 @@ class PostosPage extends StatefulWidget {
 }
 
 class _PostosPageState extends State<PostosPage> {
+  double sliderVal = 1500.0;
+
   changeZoom(double newZoomValue) {
     print("\n ## Change Zoom Value! ##");
     mapsController.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
@@ -158,24 +162,64 @@ class _PostosPageState extends State<PostosPage> {
 
   Set<Circle> circles = Set.from([
     Circle(
-      circleId: CircleId('001'),
+      circleId: CircleId('rangeRadius'),
       center: LatLng(latLng01.latitude, latLng01.longitude),
-      radius: 1000,
-      fillColor: Colors.blue,
+      radius: rangeRadius,
+      fillColor: Colors.purple.withOpacity(0.3),
     ),
-    Circle(
-      circleId: CircleId('002'),
-      center: LatLng(latLng01.latitude, latLng01.longitude),
-      radius: 5000,
-      fillColor: Colors.yellow.withOpacity(0.5),
-    ),
-    Circle(
-      circleId: CircleId('003'),
-      center: LatLng(latLng01.latitude, latLng01.longitude),
-      radius: 10000,
-      fillColor: Colors.red.withOpacity(0.5),
-    )
   ]);
+
+  Set<Circle> getFirstCircle(lat, lng) {
+    Set<Circle> circles = Set.from([
+      Circle(
+        circleId: CircleId('rangeRadius'),
+        center: LatLng(lat, lng),
+        radius: rangeRadius,
+        fillColor: Colors.purple.withOpacity(0.3),
+        strokeWidth: 1,
+      ),
+    ]);
+    return circles;
+  }
+
+  _displayLoadingWidget() {
+    // showDialog(
+    //   context: context,
+    //   barrierDismissible: false,
+    //   builder: (BuildContext context) {
+    //     return Dialog(
+    //       child: new Row(
+    //         mainAxisSize: MainAxisSize.min,
+    //         children: [
+    //           new CircularProgressIndicator(),
+    //           new Text("Loading"),
+    //         ],
+    //       ),
+    //     );
+    //   },
+    // );
+  }
+
+  showAlertDialog(BuildContext context) {
+    AlertDialog alert = AlertDialog(
+      content: new Row(
+        children: [
+          CircularProgressIndicator(
+            color: Colors.purple,
+          ),
+          Container(
+              margin: EdgeInsets.only(left: 5), child: Text(" Searching...")),
+        ],
+      ),
+    );
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
 
   @override
   void initState() {
@@ -189,7 +233,27 @@ class _PostosPageState extends State<PostosPage> {
     return Scaffold(
       key: appKey,
       appBar: AppBar(
-        title: Text('Currently Opened McDonalds'),
+        automaticallyImplyLeading: false,
+        title: Text(
+          'Currently available McDonalds',
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Colors.purple,
+        actions: [
+          IconButton(
+            icon: Icon(
+              Icons.info_outline,
+              color: Colors.white,
+            ),
+            onPressed: () {
+              print("\n ## INFO ICON APPBAR ##");
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => Tutorial()),
+              );
+            },
+          ),
+        ],
       ),
       body: ChangeNotifierProvider<PostosController>(
         create: (context) => PostosController(),
@@ -211,7 +275,8 @@ class _PostosPageState extends State<PostosPage> {
                 onMapCreated: local.onMapCreated,
                 // markers: local.markers,
                 markers: Set<Marker>.of(markers.values),
-                circles: circles,
+                // circles: circles,
+                circles: getFirstCircle(local.lat, local.long),
               ),
               Positioned(
                 bottom: 30,
@@ -223,6 +288,18 @@ class _PostosPageState extends State<PostosPage> {
                       print("\n ## TAPPED - Red Container ##");
                       print(CurrentUserPosition.latitude.toString());
                       print(CurrentUserPosition.longitude.toString());
+
+                      // showDialog(
+                      //     context: context,
+                      //     builder: (_) => AlertDialog(
+                      //           title: Text('Dialog Title'),
+                      //           content: Text('This is my content'),
+                      //         ));
+
+                      // _displayLoadingWidget();
+
+                      showAlertDialog(context);
+
                       var result = await NearcyLocationApi().getNearby(
                           userLocation: CurrentUserPosition,
                           radius: rangeRadius,
@@ -236,117 +313,205 @@ class _PostosPageState extends State<PostosPage> {
                       print(result[0]['user_ratings_total'].toString());
                       print(result[0]['opening_hours']);
                       print(result[0]['opening_hours']['open_now']);
-
+                      Navigator.pop(context);
                       _displayAlertDialog(
-                          context, result, refresh, _cleanMarkers);
+                          context,
+                          result,
+                          refresh,
+                          _cleanMarkers,
+                          changeZoomTo_14,
+                          changeZoomTo_12,
+                          changeZoomTo_11);
                       isAppWorking = false;
                     } else {
                       print("\n App is working !!");
                     }
                   },
-                  child: Container(
-                    height: 50,
-                    width: 50,
-                    color: Colors.red,
-                  ),
-                ),
-              ),
-              Positioned(
-                bottom: 100,
-                left: 10,
-                child: GestureDetector(
-                  onTap: () async {
-                    print("\n ## TAPPED - Green Container ##");
-                    _addMarker(latLng01);
-                  },
-                  child: Container(
-                    height: 50,
-                    width: 50,
-                    color: Colors.green,
-                  ),
-                ),
-              ),
-              Positioned(
-                bottom: 180,
-                left: 10,
-                child: GestureDetector(
-                  onTap: () async {
-                    print("\n ## TAPPED - Yellow Container ##");
-                    _cleanMarkers();
-                  },
-                  child: Container(
-                    height: 50,
-                    width: 50,
-                    color: Colors.yellow,
-                  ),
-                ),
-              ),
-              Positioned(
-                bottom: 250,
-                left: 10,
-                child: GestureDetector(
-                  onTap: () async {
-                    print("\n ## TAPPED - Orange Container ##");
-                    currentZoom -= 1;
-                    changeZoom(currentZoom);
-                  },
-                  child: Container(
-                    height: 50,
-                    width: 50,
-                    color: Colors.orange,
-                  ),
-                ),
-              ),
-              Positioned(
-                bottom: 330,
-                left: 10,
-                child: GestureDetector(
-                  onTap: () async {
-                    print("\n ## TAPPED - Purple Container ##");
-                    currentZoom += 1;
-                    changeZoom(currentZoom);
-                  },
-                  child: Container(
-                    height: 50,
-                    width: 50,
-                    color: Colors.purple,
-                  ),
-                ),
-              ),
-              Positioned(
-                bottom: 400,
-                left: 10,
-                child: GestureDetector(
-                  onTap: () async {
-                    print("\n ## TAPPED - Pink Container ##");
-
-                    // changeZoom(9);
-                    changeZoomTo_12();
-                  },
-                  child: Container(
-                    height: 50,
-                    width: 50,
-                    color: Colors.pink,
-                  ),
-                ),
-              ),
-              Positioned(
-                bottom: 480,
-                left: 10,
-                child: GestureDetector(
-                  onTap: () async {
-                    print("\n ## TAPPED - black Container ##");
-
-                    print("\n ## The rangeRadius is:" + rangeRadius.toString());
-                    print("\n ## The currentZoom is:" + currentZoom.toString());
-                  },
-                  child: Container(
-                    height: 50,
-                    width: 50,
+                  // child: Container(
+                  //   height: 70,
+                  //   width: 70,
+                  //   // color: Colors.red,
+                  //   decoration: BoxDecoration(
+                  //     image: DecorationImage(
+                  //       image: AssetImage(Auxstrings.iconMacDonalds004),
+                  //       fit: BoxFit.contain,
+                  //     ),
+                  //     shape: BoxShape.circle,
+                  //   ),
+                  // ),
+                  child: SvgPicture.asset(
+                    Auxstrings.iconMacDonalds005,
                     color: Colors.black,
+                    matchTextDirection: true,
+                    fit: BoxFit.contain,
+                    semanticsLabel: "aaaa",
+                    height: 50,
+                    width: 50,
                   ),
                 ),
               ),
+              // Positioned(
+              //   bottom: 100,
+              //   left: 10,
+              //   child: GestureDetector(
+              //     onTap: () async {
+              //       print("\n ## TAPPED - Green Container ##");
+              //       _addMarker(latLng01);
+              //     },
+              //     child: Container(
+              //       height: 50,
+              //       width: 50,
+              //       color: Colors.green,
+              //     ),
+              //   ),
+              // ),
+              // Positioned(
+              //   bottom: 180,
+              //   left: 10,
+              //   child: GestureDetector(
+              //     onTap: () async {
+              //       print("\n ## TAPPED - Yellow Container ##");
+              //       _cleanMarkers();
+              //     },
+              //     child: Container(
+              //       height: 50,
+              //       width: 50,
+              //       color: Colors.yellow,
+              //     ),
+              //   ),
+              // ),
+              // Positioned(
+              //   bottom: 250,
+              //   left: 10,
+              //   child: GestureDetector(
+              //     onTap: () async {
+              //       print("\n ## TAPPED - Orange Container ##");
+              //       currentZoom -= 1;
+              //       changeZoom(currentZoom);
+              //     },
+              //     child: Container(
+              //       height: 50,
+              //       width: 50,
+              //       color: Colors.orange,
+              //     ),
+              //   ),
+              // ),
+              // Positioned(
+              //   bottom: 330,
+              //   left: 10,
+              //   child: GestureDetector(
+              //     onTap: () async {
+              //       print("\n ## TAPPED - Purple Container ##");
+              //       currentZoom += 1;
+              //       changeZoom(currentZoom);
+              //     },
+              //     child: Container(
+              //       height: 50,
+              //       width: 50,
+              //       color: Colors.purple,
+              //     ),
+              //   ),
+              // ),
+              // Positioned(
+              //   bottom: 400,
+              //   left: 10,
+              //   child: GestureDetector(
+              //     onTap: () async {
+              //       print("\n ## TAPPED - Pink Container ##");
+
+              //       // changeZoom(9);
+              //       changeZoomTo_12();
+              //     },
+              //     child: Container(
+              //       height: 50,
+              //       width: 50,
+              //       color: Colors.pink,
+              //     ),
+              //   ),
+              // ),
+              // Positioned(
+              //   bottom: 480,
+              //   left: 10,
+              //   child: GestureDetector(
+              //     onTap: () async {
+              //       print("\n ## TAPPED - black Container ##");
+
+              //       print("\n ## The rangeRadius is:" + rangeRadius.toString());
+              //       print("\n ## The currentZoom is:" + currentZoom.toString());
+              //     },
+              //     child: Container(
+              //       height: 50,
+              //       width: 50,
+              //       color: Colors.black,
+              //     ),
+              //   ),
+              // ),
+              Positioned(
+                  bottom: 30,
+                  left: 60,
+                  child: Theme(
+                    data: Theme.of(context).copyWith(
+                      colorScheme: ColorScheme.fromSwatch().copyWith(
+                        onSurface: Colors.purple.withOpacity(0.3),
+                        onPrimary: Colors.black,
+                        // secondary: Colors.grey,
+                        // background: Colors.grey,
+                        // onBackground: Colors.orange,
+                        // onSecondary: Colors.purple,
+                        // primary: Colors.white,
+                        // primaryVariant: Colors.yellow,
+                        // secondaryVariant: Colors.red,
+                      ),
+                    ),
+                    child: Slider(
+                      value: sliderVal,
+                      onChanged: (value) {
+                        setState(() {
+                          sliderVal = value;
+                          rangeRadius = value;
+
+                          circles.clear();
+                          circles.add(Circle(
+                            circleId: CircleId('rangeRadius'),
+                            center: LatLng(local.lat, local.long),
+                            radius: rangeRadius,
+                            fillColor: Colors.purple.withOpacity(0.3),
+                            strokeWidth: 1,
+                          ));
+                          if (rangeRadius == 1500) {
+                            changeZoomTo_14();
+                          } else if (rangeRadius <= 5000) {
+                            changeZoomTo_12();
+                          } else {
+                            changeZoomTo_11();
+                          }
+                        });
+                      },
+                      min: 1500,
+                      max: 10000,
+                      activeColor: Colors.purple,
+                      inactiveColor: Colors.purple[100],
+                      // label: sliderVal.round().toString() + " Meters",
+                      label: (sliderVal / 1000.0).toStringAsFixed(1) + " km",
+
+                      divisions: 17,
+                    ),
+                  )),
+
+              //   Slider(
+              //   value: val,
+              //   onChanged: (value) {
+              //     setState(() {
+              //       val = value;
+              //     });
+              //   },
+              //   min: 0,
+              //   max: 10,
+              //   activeColor: Colors.green,
+              //   inactiveColor: Colors.green[100],
+              //   label: val.round().toString(),
+              //   divisions: 10,
+              // )
             ],
           );
         }),
@@ -356,7 +521,13 @@ class _PostosPageState extends State<PostosPage> {
 }
 
 Widget setupAlertDialoadContainer(
-    List results, dynamic refresh, dynamic cleanMarkers) {
+  List results,
+  dynamic refresh,
+  dynamic cleanMarkers,
+  dynamic changeZoomTo_14,
+  dynamic changeZoomTo_12,
+  dynamic changeZoomTo_11,
+) {
   return Container(
     height: 300.0,
     width: 300.0,
@@ -401,6 +572,9 @@ Widget setupAlertDialoadContainer(
                           latLng: latLng,
                           notifyParent: refresh,
                           cleanMarkers: cleanMarkers,
+                          cameraUpdate_01: changeZoomTo_14,
+                          cameraUpdate_02: changeZoomTo_12,
+                          cameraUpdate_03: changeZoomTo_11,
                         );
                       });
                 },
@@ -412,13 +586,27 @@ Widget setupAlertDialoadContainer(
 }
 
 void _displayAlertDialog(
-    BuildContext context, List results, dynamic refresh, dynamic cleanMarkers) {
+  BuildContext context,
+  List results,
+  dynamic refresh,
+  dynamic cleanMarkers,
+  dynamic changeZoomTo_14,
+  dynamic changeZoomTo_12,
+  dynamic changeZoomTo_11,
+) {
   showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Opened Now!'),
-          content: setupAlertDialoadContainer(results, refresh, cleanMarkers),
+          content: setupAlertDialoadContainer(
+            results,
+            refresh,
+            cleanMarkers,
+            changeZoomTo_14,
+            changeZoomTo_12,
+            changeZoomTo_11,
+          ),
         );
       });
 }

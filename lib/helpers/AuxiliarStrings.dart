@@ -27,6 +27,13 @@ class Auxstrings {
   static const String iconMacDonalds001 = "assets/images/001.png";
   static const String iconMacDonalds002 = "assets/images/002.png";
   static const String iconMacDonalds003 = "assets/images/003.png";
+  static const String iconMacDonalds004 = "assets/images/004.png";
+  static const String iconMacDonalds005 = "assets/images/005.svg";
+
+  static const String tutorialImage000 = "assets/tutorial/000.png";
+  static const String tutorialImage001 = "assets/tutorial/001.png";
+  static const String tutorialImage002 = "assets/tutorial/002.png";
+  static const String tutorialImage003 = "assets/tutorial/003.png";
 
 //*--------------------------------------------------------------------------------------------- background Stride Button
   // static const String PrimaryPage3_pickStrideBackground = "assets/primary/page3/pickStrideBackground.png";

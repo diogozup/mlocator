@@ -13,6 +13,9 @@ class CustomDialogBox extends StatefulWidget {
   final LatLng latLng;
   final Function() notifyParent;
   final Function() cleanMarkers;
+  final Function() cameraUpdate_01;
+  final Function() cameraUpdate_02;
+  final Function() cameraUpdate_03;
 
   const CustomDialogBox({
     Key? key,
@@ -24,6 +27,9 @@ class CustomDialogBox extends StatefulWidget {
     required this.latLng,
     required this.notifyParent,
     required this.cleanMarkers,
+    required this.cameraUpdate_01,
+    required this.cameraUpdate_02,
+    required this.cameraUpdate_03,
   }) : super(key: key);
 
   @override
@@ -83,6 +89,13 @@ class _CustomDialogBoxState extends State<CustomDialogBox> {
 
     widget.notifyParent();
     //!-- CHANGE THE ZOOM LEVEL ACCOUTING THE RADIUS OF THE QUERY HERE!
+    if (rangeRadius == 1500) {
+      widget.cameraUpdate_01();
+    } else if (rangeRadius <= 5000) {
+      widget.cameraUpdate_02();
+    } else {
+      widget.cameraUpdate_03();
+    }
   }
 
   @override

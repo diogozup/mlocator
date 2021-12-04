@@ -43,10 +43,11 @@ dependencies:
   google_maps_flutter: ^2.1.0
 
   http: ^0.13.4
-
   uuid: ^3.0.5
+  flutter_svg: ^1.0.0
 
-
+  #Tutorial
+  flutter_overboard: ^2.0.1
 
 dev_dependencies:
   flutter_test:
@@ -76,8 +77,14 @@ flutter:
       - assets/images/001.png
       - assets/images/002.png
       - assets/images/003.png
+      - assets/images/004.png
+      - assets/images/005.svg
       - assets/maps/marker01.png
       - assets/maps/marker02.png
+      - assets/tutorial/000.png
+      - assets/tutorial/001.png
+      - assets/tutorial/002.png
+      - assets/tutorial/003.png
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
