@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -25,6 +27,16 @@ class PostosPage extends StatefulWidget {
 
 class _PostosPageState extends State<PostosPage> {
   double sliderVal = 1500.0;
+  bool hasNetwork = false;
+
+  Future<bool> hasNetworkCheck() async {
+    try {
+      final result = await InternetAddress.lookup('example.com');
+      return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
+    } on SocketException catch (_) {
+      return false;
+    }
+  }
 
   changeZoom(double newZoomValue) {
     print("\n ## Change Zoom Value! ##");
@@ -116,49 +128,49 @@ class _PostosPageState extends State<PostosPage> {
         ImageConfiguration(devicePixelRatio: 1.0), 'assets/maps/marker02.png');
   }
 
-  void _addMarker(LatLng latLng) async {
-    var uuid = Uuid();
-    // Generate a v1 (time-based) id - SO SINCE THEY ALL CREATED ON BUILD, I CHANGED TO v4!
-    var v4 = uuid.v4();
+  // void _addMarker(LatLng latLng) async {
+  //   var uuid = Uuid();
+  //   // Generate a v1 (time-based) id - SO SINCE THEY ALL CREATED ON BUILD, I CHANGED TO v4!
+  //   var v4 = uuid.v4();
 
-    var markerIdVal = v4.toString();
-    MarkerId markerId = MarkerId(markerIdVal);
+  //   var markerIdVal = v4.toString();
+  //   MarkerId markerId = MarkerId(markerIdVal);
 
-    // creating a new MARKER
-    final Marker marker = Marker(
-      draggable: true,
-      markerId: markerId,
-      icon: customIcon,
-      position: LatLng(latLng.latitude, latLng.longitude),
-      onDragEnd: ((newPosition) {
-        print(newPosition.latitude);
-        print(newPosition.longitude);
-        // _updateMarkerPositon(markerId, newPosition);
-        // markers[markerId] = marker.copyWith(positionParam: LatLng(newPosition.latitude, newPosition.longitude));
-      }),
-      infoWindow: InfoWindow(
-        title: markers.length == 0
-            ? 'This is open now!'
-            : 'CheckPoint - ' + markers.length.toString(),
-        // snippet: markerIdVal,
-        snippet: "Click here to delete this marker",
+  //   // creating a new MARKER
+  //   final Marker marker = Marker(
+  //     draggable: true,
+  //     markerId: markerId,
+  //     icon: customIcon,
+  //     position: LatLng(latLng.latitude, latLng.longitude),
+  //     onDragEnd: ((newPosition) {
+  //       print(newPosition.latitude);
+  //       print(newPosition.longitude);
+  //       // _updateMarkerPositon(markerId, newPosition);
+  //       // markers[markerId] = marker.copyWith(positionParam: LatLng(newPosition.latitude, newPosition.longitude));
+  //     }),
+  //     infoWindow: InfoWindow(
+  //       title: markers.length == 0
+  //           ? 'This is open now!'
+  //           : 'CheckPoint - ' + markers.length.toString(),
+  //       // snippet: markerIdVal,
+  //       snippet: "Click here to delete this marker",
 
-        onTap: () {
-          // _deleteThisMarker(markerId);
-          _cleanMarkers();
-          print("\n ## DELETE THIS MARKER ##");
-        },
-      ),
-      onTap: () {
-        // _onMarkerTapped(markerId, latLng);
-        print("\n ## INFO WINDOW ##");
-      },
-    );
+  //       onTap: () {
+  //         // _deleteThisMarker(markerId);
+  //         _cleanMarkers();
+  //         print("\n ## DELETE THIS MARKER ##");
+  //       },
+  //     ),
+  //     onTap: () {
+  //       // _onMarkerTapped(markerId, latLng);
+  //       print("\n ## INFO WINDOW! ##");
+  //     },
+  //   );
 
-    setState(() {
-      markers[markerId] = marker;
-    });
-  }
+  //   setState(() {
+  //     markers[markerId] = marker;
+  //   });
+  // }
 
   Set<Circle> circles = Set.from([
     Circle(
@@ -283,48 +295,64 @@ class _PostosPageState extends State<PostosPage> {
                 left: 10,
                 child: GestureDetector(
                   onTap: () async {
-                    if (!isAppWorking) {
-                      isAppWorking = true;
-                      print("\n ## TAPPED - Red Container ##");
-                      print(CurrentUserPosition.latitude.toString());
-                      print(CurrentUserPosition.longitude.toString());
+                    hasNetwork = await hasNetworkCheck();
+                    if (hasNetwork) {
+                      hasNetwork = false;
+                      if (!isAppWorking) {
+                        isAppWorking = true;
+                        print("\n ## TAPPED - Red Container ##");
+                        print(CurrentUserPosition.latitude.toString());
+                        print(CurrentUserPosition.longitude.toString());
 
-                      // showDialog(
-                      //     context: context,
-                      //     builder: (_) => AlertDialog(
-                      //           title: Text('Dialog Title'),
-                      //           content: Text('This is my content'),
-                      //         ));
+                        // showDialog(
+                        //     context: context,
+                        //     builder: (_) => AlertDialog(
+                        //           title: Text('Dialog Title'),
+                        //           content: Text('This is my content'),
+                        //         ));
 
-                      // _displayLoadingWidget();
+                        // _displayLoadingWidget();
 
-                      showAlertDialog(context);
+                        showAlertDialog(context);
 
-                      var result = await NearcyLocationApi().getNearby(
-                          userLocation: CurrentUserPosition,
-                          radius: rangeRadius,
-                          type: 'restaurants',
-                          keyword: "McDonalds");
-                      print("\n #### RESULT LENGHT ####");
-                      print(result.length.toString());
-                      print(result[0]['place_id']);
-                      print(result[0]['name']);
-                      print(result[0]['vicinity']);
-                      print(result[0]['user_ratings_total'].toString());
-                      print(result[0]['opening_hours']);
-                      print(result[0]['opening_hours']['open_now']);
-                      Navigator.pop(context);
-                      _displayAlertDialog(
+                        var result = await NearcyLocationApi().getNearby(
+                            userLocation: CurrentUserPosition,
+                            radius: rangeRadius,
+                            type: 'restaurants',
+                            keyword: "McDonalds");
+                        print("\n #### RESULT LENGHT ####");
+                        print(result.length.toString());
+                        print(result[0]['place_id']);
+                        print(result[0]['name']);
+                        print(result[0]['vicinity']);
+                        print(result[0]['user_ratings_total'].toString());
+                        print(result[0]['opening_hours']);
+                        print(result[0]['opening_hours']['open_now']);
+                        Navigator.pop(context);
+                        _displayAlertDialog(
                           context,
                           result,
                           refresh,
                           _cleanMarkers,
                           changeZoomTo_14,
                           changeZoomTo_12,
-                          changeZoomTo_11);
-                      isAppWorking = false;
+                          changeZoomTo_11,
+                        );
+                        isAppWorking = false;
+                      } else {
+                        print("\n App is working !!");
+                      }
                     } else {
-                      print("\n App is working !!");
+                      hasNetwork = false;
+                      showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: Text("Oops!"),
+                              content: Text(
+                                  "You appear to be offline, this app requires an internet connection"),
+                            );
+                          });
                     }
                   },
                   // child: Container(
@@ -350,6 +378,35 @@ class _PostosPageState extends State<PostosPage> {
                   ),
                 ),
               ),
+              markers.length == 0
+                  ? Container()
+                  : Positioned(
+                      bottom: 100,
+                      left: 10,
+                      child: GestureDetector(
+                        onTap: () async {
+                          print("\n ## TAPPED - clean markers ##");
+                          _cleanMarkers();
+                        },
+                        child: Container(
+                          height: 50,
+                          width: 50,
+                          // color: Colors.green,
+                          decoration: BoxDecoration(
+                              color: Colors.purple,
+                              border: Border.all(
+                                color: Colors.purple,
+                              ),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10))),
+                          child: Icon(
+                            Icons.refresh,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+
               // Positioned(
               //   bottom: 100,
               //   left: 10,

@@ -1,8 +1,10 @@
+import 'package:dio/dio.dart';
 import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:mlocator/pages/postos_page.dart';
+import 'package:mlocator/ui/constants/map_key.dart';
 import 'package:uuid/uuid.dart';
 
 class CustomDialogBox extends StatefulWidget {
@@ -68,17 +70,43 @@ class _CustomDialogBoxState extends State<CustomDialogBox> {
             ? 'This is open now!'
             : 'CheckPoint - ' + markers.length.toString(),
         // snippet: markerIdVal,
-        snippet: "Click here to delete this marker",
+        snippet: "Click here to check details",
 
-        onTap: () {
+        onTap: () async {
           // _deleteThisMarker(markerId);
-          widget.cleanMarkers();
+          // widget.cleanMarkers();
           print("\n ## DELETE MARKERS ##");
+          print("\n\n ## DETAILS ##");
+          Dio dio = new Dio();
+
+          Response response = await dio.get(
+              "https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=40.6655101,-73.89188969999998&destinations=40.6905615%2C,-73.9976592&key=AIzaSyAQ7cjyXO5qkbUA_QBIVvYtaNEse8i_IJA");
+          print(response.data);
+
+          showModalBottomSheet(
+            context: appKey.currentState!.context,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              ),
+            ),
+            builder: (context) {
+              return Wrap(
+                children: [
+                  ListTile(
+                    leading: Icon(Icons.social_distance),
+                    title: Text('Share'),
+                  ),
+                ],
+              );
+            },
+          );
         },
       ),
       onTap: () {
         // _onMarkerTapped(markerId, latLng);
-        print("\n ## INFO WINDOW ##");
+        print("\n ## INFO WINDOW!!! ##");
       },
     );
 
@@ -140,7 +168,7 @@ class _CustomDialogBoxState extends State<CustomDialogBox> {
               ),
               Text(
                 widget.descriptions,
-                style: TextStyle(fontSize: 14),
+                style: TextStyle(fontSize: 14, color: Colors.purple),
                 textAlign: TextAlign.center,
               ),
               SizedBox(
@@ -182,7 +210,7 @@ class _CustomDialogBoxState extends State<CustomDialogBox> {
                     },
                     child: Text(
                       widget.text,
-                      style: TextStyle(fontSize: 18),
+                      style: TextStyle(fontSize: 18, color: Colors.purple),
                     )),
               ),
             ],
