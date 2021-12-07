@@ -257,7 +257,14 @@ class _PostosPageState extends State<PostosPage> {
           'Currently available McDonalds',
           style: TextStyle(color: Colors.white),
         ),
-        backgroundColor: Colors.purple,
+        // backgroundColor: Colors.purple,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+              gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: <Color>[Colors.purple, Colors.black])),
+        ),
         actions: [
           IconButton(
             icon: Icon(
