@@ -2,7 +2,11 @@ import 'package:dio/dio.dart';
 import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:mlocator/controllers/postos_controller.dart';
+import 'package:mlocator/helpers/AuxiliarStrings.dart';
+import 'package:mlocator/helpers/MapUtils.dart';
 import 'package:mlocator/pages/postos_page.dart';
 import 'package:mlocator/ui/constants/map_key.dart';
 import 'package:uuid/uuid.dart';
@@ -78,10 +82,26 @@ class _CustomDialogBoxState extends State<CustomDialogBox> {
           print("\n ## DELETE MARKERS ##");
           print("\n\n ## DETAILS ##");
           Dio dio = new Dio();
-
           Response response = await dio.get(
-              "https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=40.6655101,-73.89188969999998&destinations=40.6905615%2C,-73.9976592&key=AIzaSyAQ7cjyXO5qkbUA_QBIVvYtaNEse8i_IJA");
+              "https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=${CurrentUserPosition.latitude},${CurrentUserPosition.longitude}&destinations=${widget.latLng.latitude},${widget.latLng.longitude}&key=${MapKey.apiKeyDistanceMatrix}");
+          // "https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=41.4472213,-8.2825556&destinations=41.4472213,-8.2825556&key=AIzaSyAgDB2tilx_lL-juFtIoa2B2CVA9e76UKI");
           print(response.data);
+          print("\n ##");
+          print(response.data["rows"][0]["elements"][0]["distance"]["text"]);
+          print(response.data["rows"][0]["elements"][0]["duration"]["text"]);
+          //?- distance
+          String distanceInMiles =
+              response.data["rows"][0]["elements"][0]["distance"]["text"];
+          distanceInMiles =
+              distanceInMiles.substring(0, distanceInMiles.length - 3);
+          // print("DISTANCE IN MILES: " + distanceInMiles);
+          double distanceInKM = double.parse(distanceInMiles) * 1.60934;
+          // print("DISTANCE IN KM: " + distanceInKM.toStringAsFixed(2));
+          //?- travelTime
+          String travelTime =
+              response.data["rows"][0]["elements"][0]["duration"]["text"];
+          double travelTimeInMinutes =
+              double.parse(travelTime.substring(0, travelTime.length - 4));
 
           showModalBottomSheet(
             context: appKey.currentState!.context,
@@ -94,9 +114,51 @@ class _CustomDialogBoxState extends State<CustomDialogBox> {
             builder: (context) {
               return Wrap(
                 children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 20.0, bottom: 20.0),
+                    child: Container(
+                      height: 50,
+                      child: Center(
+                        child: SvgPicture.asset(
+                          Auxstrings.iconMacDonalds005,
+                          color: Colors.black,
+                          matchTextDirection: true,
+                          fit: BoxFit.contain,
+                          semanticsLabel: "aaaa",
+                          height: 50,
+                          width: 50,
+                        ),
+                      ),
+                    ),
+                  ),
                   ListTile(
-                    leading: Icon(Icons.social_distance),
-                    title: Text('Share'),
+                    leading: Icon(Icons.directions_car_filled),
+                    title: Text(
+                        'Distance: ' + distanceInKM.toStringAsFixed(2) + ' km'),
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.access_time_filled),
+                    title: Text('Travel time: ' +
+                        travelTimeInMinutes.toStringAsFixed(0) +
+                        ' minutes'),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      print("\n ## TAPPED ##");
+                      MapUtils.openMap(
+                          widget.latLng.latitude, widget.latLng.longitude);
+                    },
+                    child: ListTile(
+                      tileColor: Colors.purple,
+                      leading: Icon(
+                        Icons.arrow_forward_rounded,
+                        color: Colors.white,
+                      ),
+                      title: Text(
+                        'GO THERE !',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
                   ),
                 ],
               );

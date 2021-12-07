@@ -6,6 +6,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:mlocator/controllers/postos_controller.dart';
 import 'package:mlocator/helpers/AuxiliarStrings.dart';
 import 'package:mlocator/helpers/CustomDialogBox.dart';
+import 'package:mlocator/helpers/MapUtils.dart';
 import 'package:mlocator/pages/tutorial.dart';
 import 'package:mlocator/services/nearby_location_api.dart';
 import 'package:provider/provider.dart';
@@ -120,6 +121,7 @@ class _PostosPageState extends State<PostosPage> {
     setState(() {
       print("\n ## Clean Markers! ##");
       markers = <MarkerId, Marker>{};
+      isAppWorking = false;
     });
   }
 
@@ -233,6 +235,11 @@ class _PostosPageState extends State<PostosPage> {
     );
   }
 
+  void printWrapped(String text) {
+    final pattern = RegExp('.{1,800}'); // 800 is the size of each chunk
+    pattern.allMatches(text).forEach((match) => print(match.group(0)));
+  }
+
   @override
   void initState() {
     // TODO: implement initState
@@ -321,6 +328,10 @@ class _PostosPageState extends State<PostosPage> {
                             type: 'restaurants',
                             keyword: "McDonalds");
                         print("\n #### RESULT LENGHT ####");
+                        print(result[0].keys);
+                        printWrapped(result[0].toString());
+                        printWrapped(result[1].toString());
+                        print("\n\n\n ### ### ### ### ");
                         print(result.length.toString());
                         print(result[0]['place_id']);
                         print(result[0]['name']);
@@ -428,7 +439,8 @@ class _PostosPageState extends State<PostosPage> {
               //   child: GestureDetector(
               //     onTap: () async {
               //       print("\n ## TAPPED - Yellow Container ##");
-              //       _cleanMarkers();
+              //       // _cleanMarkers();
+              //       MapUtils.openMap(-3.823216, -38.481700);
               //     },
               //     child: Container(
               //       height: 50,
@@ -573,6 +585,34 @@ class _PostosPageState extends State<PostosPage> {
           );
         }),
       ),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(top: 100.0),
+        child: Container(
+          height: 100,
+          width: 120,
+          child: FittedBox(
+            child: Opacity(
+              opacity: 0.9,
+              child: new FloatingActionButton.extended(
+                label: Text(
+                  (rangeRadius / 1000.0).toStringAsFixed(1) + " km",
+                  style: TextStyle(
+                    color: Colors.white,
+                  ),
+                ),
+                heroTag: 'displayDistance',
+                elevation: 0.0,
+
+                // backgroundColor: Auxstrings.mainAppThemeColor02,
+                backgroundColor: Colors.black,
+
+                onPressed: () {},
+              ),
+            ),
+          ),
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.miniCenterTop,
     );
   }
 }
@@ -597,7 +637,7 @@ Widget setupAlertDialoadContainer(
             ? ListTile(
                 leading: CircleAvatar(
                   radius: 30.0,
-                  backgroundImage: AssetImage(Auxstrings.iconMacDonalds003),
+                  backgroundImage: AssetImage(Auxstrings.iconMacDonalds004),
                 ),
                 title: Text(results[index]['name']),
                 subtitle: Text(results[index]['vicinity']),
