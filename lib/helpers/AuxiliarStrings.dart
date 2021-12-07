@@ -35,6 +35,8 @@ class Auxstrings {
   static const String tutorialImage002 = "assets/tutorial/002.png";
   static const String tutorialImage003 = "assets/tutorial/003.png";
 
+  static const String background001 = "assets/screen01/background001.jpg";
+
 //*--------------------------------------------------------------------------------------------- background Stride Button
   // static const String PrimaryPage3_pickStrideBackground = "assets/primary/page3/pickStrideBackground.png";
   static const String PrimaryPage3_pickStrideBackground =
