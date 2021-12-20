@@ -235,6 +235,25 @@ class _PostosPageState extends State<PostosPage> {
     );
   }
 
+  showAlertDialog_NoHitsFound(BuildContext context) {
+    AlertDialog alert = AlertDialog(
+      title: Text("Oops!"),
+      content: new Row(
+        children: [
+          Container(
+              margin: EdgeInsets.only(left: 5), child: Text("Nothing Found!")),
+        ],
+      ),
+    );
+    showDialog(
+      barrierDismissible: true,
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
+
   void printWrapped(String text) {
     final pattern = RegExp('.{1,800}'); // 800 is the size of each chunk
     pattern.allMatches(text).forEach((match) => print(match.group(0)));
@@ -245,6 +264,7 @@ class _PostosPageState extends State<PostosPage> {
     // TODO: implement initState
     super.initState();
     setCustomMarker();
+    rangeRadius = 1500;
   }
 
   @override
@@ -335,28 +355,38 @@ class _PostosPageState extends State<PostosPage> {
                             type: 'restaurants',
                             keyword: "McDonalds");
                         print("\n #### RESULT LENGHT ####");
-                        print(result[0].keys);
-                        printWrapped(result[0].toString());
-                        printWrapped(result[1].toString());
-                        print("\n\n\n ### ### ### ### ");
+                        // print(result[0].keys);
+                        // printWrapped(result[0].toString());
+                        // printWrapped(result[1].toString());
+                        // print("\n\n\n ### ### ### ### ");
+                        // print(result.length.toString());
+                        // print(result[0]['place_id']);
+                        // print(result[0]['name']);
+                        // print(result[0]['vicinity']);
+                        // print(result[0]['user_ratings_total'].toString());
+                        // print(result[0]['opening_hours']);
+                        // print(result[0]['opening_hours']['open_now']);
+                        print("\n\n ####");
                         print(result.length.toString());
-                        print(result[0]['place_id']);
-                        print(result[0]['name']);
-                        print(result[0]['vicinity']);
-                        print(result[0]['user_ratings_total'].toString());
-                        print(result[0]['opening_hours']);
-                        print(result[0]['opening_hours']['open_now']);
-                        Navigator.pop(context);
-                        _displayAlertDialog(
-                          context,
-                          result,
-                          refresh,
-                          _cleanMarkers,
-                          changeZoomTo_14,
-                          changeZoomTo_12,
-                          changeZoomTo_11,
-                        );
-                        isAppWorking = false;
+                        if (result.length != 0) {
+                          Navigator.pop(context);
+
+                          _displayAlertDialog(
+                            context,
+                            result,
+                            refresh,
+                            _cleanMarkers,
+                            changeZoomTo_14,
+                            changeZoomTo_12,
+                            changeZoomTo_11,
+                          );
+                          isAppWorking = false;
+                        } else {
+                          Navigator.pop(context);
+                          isAppWorking = false;
+                          print("\n\n ## display NO FOUND ##");
+                          showAlertDialog_NoHitsFound(context);
+                        }
                       } else {
                         print("\n App is working !!");
                       }

@@ -133,8 +133,9 @@ class _CustomDialogBoxState extends State<CustomDialogBox> {
                   ),
                   ListTile(
                     leading: Icon(Icons.directions_car_filled),
-                    title: Text(
-                        'Distance: ' + distanceInKM.toStringAsFixed(2) + ' km'),
+                    title: Text('Exact distance by car: ' +
+                        distanceInKM.toStringAsFixed(2) +
+                        ' km'),
                   ),
                   ListTile(
                     leading: Icon(Icons.access_time_filled),
