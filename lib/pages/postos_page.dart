@@ -426,7 +426,7 @@ class _PostosPageState extends State<PostosPage> {
                   ),
                 ),
               ),
-              markers.length == 0
+              markers.length == 0 || markers.isEmpty
                   ? Container()
                   : Positioned(
                       bottom: 100,
