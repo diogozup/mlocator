@@ -17,6 +17,7 @@ bool isAppWorking = false;
 double rangeRadius = 3500;
 late BitmapDescriptor customIcon;
 double currentZoom = 10.0;
+int getUserLocationStatus = -1;
 
 Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
 LatLng latLng01 = LatLng(41.4472213, -8.2825556); // DUMMY_DATA
@@ -37,6 +38,45 @@ class _PostosPageState extends State<PostosPage> {
     } on SocketException catch (_) {
       return false;
     }
+  }
+
+  showAlertDialog_Error0(BuildContext context) {
+    AlertDialog alert = AlertDialog(
+      title: Text("Oops!"),
+      content: new Row(
+        children: [
+          Container(
+              margin: EdgeInsets.only(left: 5), child: Text("Not updated!")),
+        ],
+      ),
+    );
+    showDialog(
+      barrierDismissible: true,
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
+
+  showAlertDialog_Error1(BuildContext context) {
+    AlertDialog alert = AlertDialog(
+      title: Text("Oops!"),
+      content: new Row(
+        children: [
+          Container(
+              margin: EdgeInsets.only(left: 5),
+              child: Text("Por favor, habilite a localização no smartphone")),
+        ],
+      ),
+    );
+    showDialog(
+      barrierDismissible: true,
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
   }
 
   changeZoom(double newZoomValue) {

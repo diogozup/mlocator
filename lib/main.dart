@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_config/flutter_config.dart';
 import 'package:flutter_glow/flutter_glow.dart';
+import 'package:location/location.dart';
 import 'package:mlocator/helpers/AuxiliarStrings.dart';
 import 'package:mlocator/repositories/postos_repository.dart';
 import 'package:mlocator/pages/postos_page.dart';
@@ -127,13 +128,44 @@ class _MyHomePageState extends State<MyHomePage> {
               "Find available McDonalds right now!",
               style: TextStyle(color: Colors.white),
             ),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => PostosPage()),
-              );
+            onPressed: () async {
+              //! CHECK THE LOCATION PERSMISSON AND GIVE DIALOG MESSAGE
+              bool result = await checkLocationPermission();
+              if (result) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => PostosPage()),
+                );
+              }
             }),
       ),
     );
   }
+}
+
+checkLocationPermission() async {
+  Location location = new Location();
+
+  bool _serviceEnabled;
+  PermissionStatus _permissionGranted;
+  LocationData _locationData;
+
+  _serviceEnabled = await location.serviceEnabled();
+  if (!_serviceEnabled) {
+    _serviceEnabled = await location.requestService();
+    if (!_serviceEnabled) {
+      return;
+    }
+  }
+
+  _permissionGranted = await location.hasPermission();
+  if (_permissionGranted == PermissionStatus.denied) {
+    _permissionGranted = await location.requestPermission();
+    if (_permissionGranted != PermissionStatus.granted) {
+      return;
+    }
+  }
+
+  _locationData = await location.getLocation();
+  return true;
 }
