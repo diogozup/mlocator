@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -10,6 +11,7 @@ import 'package:mlocator/helpers/MapUtils.dart';
 import 'package:mlocator/pages/tutorial.dart';
 import 'package:mlocator/services/nearby_location_api.dart';
 import 'package:provider/provider.dart';
+import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 import 'package:uuid/uuid.dart';
 
 final appKey = GlobalKey();
@@ -18,6 +20,7 @@ double rangeRadius = 3500;
 late BitmapDescriptor customIcon;
 double currentZoom = 10.0;
 int getUserLocationStatus = -1;
+bool isAnimatedTextDisplayed = false;
 
 Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
 LatLng latLng01 = LatLng(41.4472213, -8.2825556); // DUMMY_DATA
@@ -30,6 +33,137 @@ class PostosPage extends StatefulWidget {
 class _PostosPageState extends State<PostosPage> {
   double sliderVal = 1500.0;
   bool hasNetwork = false;
+
+  late TutorialCoachMark tutorialCoachMark;
+  List<TargetFocus> targets = <TargetFocus>[];
+  GlobalKey keyBottomNavigation1 = GlobalKey();
+  GlobalKey keyBottomNavigation2 = GlobalKey();
+  GlobalKey keyBottomNavigation3 = GlobalKey();
+
+  void showTutorial() {
+    initTargets();
+    tutorialCoachMark = TutorialCoachMark(
+      context,
+      targets: targets,
+      colorShadow: Colors.purple,
+      textSkip: "",
+      paddingFocus: 5,
+      opacityShadow: 0.8,
+      onFinish: () {
+        print("finish");
+      },
+      onClickTarget: (target) {
+        print('onClickTarget: $target');
+      },
+      onClickOverlay: (target) {
+        print('onClickOverlay: $target');
+      },
+      onSkip: () {
+        print("skip");
+      },
+    )..show();
+  }
+
+  void initTargets() {
+    targets.clear();
+    targets.add(
+      TargetFocus(
+          identify: "Target 1",
+          keyTarget: keyBottomNavigation1,
+          contents: [
+            TargetContent(
+                align: ContentAlign.bottom,
+                child: Container(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.max,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      Text(
+                        "Titulo lorem ipsum",
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            fontSize: 20.0),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 10.0),
+                        child: Text(
+                          "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin pulvinar tortor eget maximus iaculis.",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      )
+                    ],
+                  ),
+                ))
+          ]),
+    );
+    targets.add(
+      TargetFocus(
+          identify: "Target 2",
+          keyTarget: keyBottomNavigation2,
+          contents: [
+            TargetContent(
+                align: ContentAlign.top,
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 100.0),
+                  child: Container(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: <Widget>[
+                        Text(
+                          "Titulo lorem ipsum",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              fontSize: 20.0),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 10.0),
+                          child: Text(
+                            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin pulvinar tortor eget maximus iaculis.",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                ))
+          ]),
+    );
+
+    targets.add(
+      TargetFocus(
+          identify: "Target 3",
+          keyTarget: keyBottomNavigation3,
+          contents: [
+            TargetContent(
+                align: ContentAlign.top,
+                child: Container(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      Text(
+                        "Titulo lorem ipsum",
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            fontSize: 20.0),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 10.0),
+                        child: Text(
+                          "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin pulvinar tortor eget maximus iaculis.",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      )
+                    ],
+                  ),
+                ))
+          ]),
+    );
+  }
 
   Future<bool> hasNetworkCheck() async {
     try {
@@ -162,6 +296,7 @@ class _PostosPageState extends State<PostosPage> {
       print("\n ## Clean Markers! ##");
       markers = <MarkerId, Marker>{};
       isAppWorking = false;
+      isAnimatedTextDisplayed = false;
     });
   }
 
@@ -299,398 +434,457 @@ class _PostosPageState extends State<PostosPage> {
     pattern.allMatches(text).forEach((match) => print(match.group(0)));
   }
 
+  _displayTutorialIfFirstTimeAppIsOpened() {
+    printColor(Auxstrings.colorRed, "INIT STAT GOOGLE MAPS SHOW TUTORIAL");
+  }
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     setCustomMarker();
     rangeRadius = 1500;
+    _displayTutorialIfFirstTimeAppIsOpened();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: appKey,
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: Text(
-          'Currently available McDonalds',
-          style: TextStyle(color: Colors.white),
-        ),
-        // backgroundColor: Colors.purple,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-              gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: <Color>[Colors.purple, Colors.black])),
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(
-              Icons.info_outline,
-              color: Colors.white,
-            ),
-            onPressed: () {
-              print("\n ## INFO ICON APPBAR ##");
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => Tutorial()),
-              );
-            },
+        key: appKey,
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          title: Text(
+            'Currently available McDonalds',
+            style: TextStyle(color: Colors.white),
           ),
-        ],
-      ),
-      body: ChangeNotifierProvider<PostosController>(
-        create: (context) => PostosController(),
-        child: Builder(builder: (context) {
-          final local = context.watch<PostosController>();
-
-          return Stack(
-            children: [
-              GoogleMap(
-                zoomGesturesEnabled: true,
-                initialCameraPosition: CameraPosition(
-                  target: LatLng(local.lat, local.long),
-                  // zoom: 18,
-                  zoom: currentZoom,
-                ),
-                zoomControlsEnabled: true,
-                mapType: MapType.normal,
-                myLocationEnabled: true,
-                onMapCreated: local.onMapCreated,
-                // markers: local.markers,
-                markers: Set<Marker>.of(markers.values),
-                // circles: circles,
-                circles: getFirstCircle(local.lat, local.long),
+          // backgroundColor: Colors.purple,
+          flexibleSpace: Container(
+            decoration: BoxDecoration(
+                gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: <Color>[Colors.purple, Colors.black])),
+          ),
+          actions: [
+            IconButton(
+              icon: Icon(
+                Icons.info_outline,
+                color: Colors.white,
               ),
-              Positioned(
-                bottom: 30,
-                left: 10,
-                child: GestureDetector(
-                  onTap: () async {
-                    hasNetwork = await hasNetworkCheck();
-                    if (hasNetwork) {
-                      hasNetwork = false;
-                      if (!isAppWorking) {
-                        isAppWorking = true;
-                        print("\n ## TAPPED - Red Container ##");
-                        print(CurrentUserPosition.latitude.toString());
-                        print(CurrentUserPosition.longitude.toString());
+              onPressed: () {
+                Future.delayed(Duration.zero, showTutorial);
+              },
+            ),
+            IconButton(
+              key: keyBottomNavigation1,
+              icon: Icon(
+                Icons.info_outline,
+                color: Colors.white,
+              ),
+              onPressed: () {
+                print("\n ## INFO ICON APPBAR ##");
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => Tutorial()),
+                );
+              },
+            ),
+          ],
+        ),
+        body: ChangeNotifierProvider<PostosController>(
+          create: (context) => PostosController(),
+          child: Builder(builder: (context) {
+            final local = context.watch<PostosController>();
 
-                        // showDialog(
-                        //     context: context,
-                        //     builder: (_) => AlertDialog(
-                        //           title: Text('Dialog Title'),
-                        //           content: Text('This is my content'),
-                        //         ));
+            return Stack(
+              children: [
+                GoogleMap(
+                  zoomGesturesEnabled: true,
+                  initialCameraPosition: CameraPosition(
+                    target: LatLng(local.lat, local.long),
+                    // zoom: 18,
+                    zoom: currentZoom,
+                  ),
+                  zoomControlsEnabled: true,
+                  mapType: MapType.normal,
+                  myLocationEnabled: true,
+                  onMapCreated: local.onMapCreated,
+                  // markers: local.markers,
+                  markers: Set<Marker>.of(markers.values),
+                  // circles: circles,
+                  circles: getFirstCircle(local.lat, local.long),
+                ),
+                Positioned(
+                  top: 120,
+                  width: MediaQuery.of(context).size.width * 1,
+                  child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: <Widget>[
+                        // Container(
+                        //   width: 100,
+                        //   height: 100,
+                        //   color: Colors.red,
+                        // ),
+                        // SizedBox(
+                        isAnimatedTextDisplayed
+                            ? Container(
+                                // color: Colors.purple,
+                                width: 250,
+                                child: DefaultTextStyle(
+                                  style: const TextStyle(
+                                    fontSize: 20.0,
+                                    fontFamily: 'Canterbury',
+                                    color: Colors.black,
+                                  ),
+                                  child: AnimatedTextKit(
+                                    totalRepeatCount: 4,
+                                    animatedTexts: [
+                                      ScaleAnimatedText(
+                                          'Click the marker for Details'),
+                                      // ScaleAnimatedText('for Details'),
+                                    ],
+                                    onTap: () {
+                                      print("Tap Event");
+                                      setState(() {
+                                        isAnimatedTextDisplayed = false;
+                                      });
+                                    },
+                                  ),
+                                ),
+                              )
+                            : Container(),
+                      ]),
+                ),
 
-                        // _displayLoadingWidget();
+                Positioned(
+                  key: keyBottomNavigation3,
+                  bottom: 30,
+                  left: 10,
+                  child: GestureDetector(
+                    onTap: () async {
+                      hasNetwork = await hasNetworkCheck();
+                      if (hasNetwork) {
+                        hasNetwork = false;
+                        if (!isAppWorking) {
+                          isAppWorking = true;
+                          print("\n ## TAPPED - Red Container ##");
+                          print(CurrentUserPosition.latitude.toString());
+                          print(CurrentUserPosition.longitude.toString());
 
-                        showAlertDialog(context);
+                          // showDialog(
+                          //     context: context,
+                          //     builder: (_) => AlertDialog(
+                          //           title: Text('Dialog Title'),
+                          //           content: Text('This is my content'),
+                          //         ));
 
-                        var result = await NearcyLocationApi().getNearby(
-                            userLocation: CurrentUserPosition,
-                            radius: rangeRadius,
-                            type: 'restaurants',
-                            keyword: "McDonalds");
-                        print("\n #### RESULT LENGHT ####");
-                        // print(result[0].keys);
-                        // printWrapped(result[0].toString());
-                        // printWrapped(result[1].toString());
-                        // print("\n\n\n ### ### ### ### ");
-                        // print(result.length.toString());
-                        // print(result[0]['place_id']);
-                        // print(result[0]['name']);
-                        // print(result[0]['vicinity']);
-                        // print(result[0]['user_ratings_total'].toString());
-                        // print(result[0]['opening_hours']);
-                        // print(result[0]['opening_hours']['open_now']);
-                        print("\n\n ####");
-                        print(result.length.toString());
-                        if (result.length != 0) {
-                          Navigator.pop(context);
+                          // _displayLoadingWidget();
 
-                          _displayAlertDialog(
-                            context,
-                            result,
-                            refresh,
-                            _cleanMarkers,
-                            changeZoomTo_14,
-                            changeZoomTo_12,
-                            changeZoomTo_11,
-                          );
-                          isAppWorking = false;
+                          showAlertDialog(context);
+
+                          var result = await NearcyLocationApi().getNearby(
+                              userLocation: CurrentUserPosition,
+                              radius: rangeRadius,
+                              type: 'restaurants',
+                              keyword: "McDonalds");
+                          print("\n #### RESULT LENGHT ####");
+                          // print(result[0].keys);
+                          // printWrapped(result[0].toString());
+                          // printWrapped(result[1].toString());
+                          // print("\n\n\n ### ### ### ### ");
+                          // print(result.length.toString());
+                          // print(result[0]['place_id']);
+                          // print(result[0]['name']);
+                          // print(result[0]['vicinity']);
+                          // print(result[0]['user_ratings_total'].toString());
+                          // print(result[0]['opening_hours']);
+                          // print(result[0]['opening_hours']['open_now']);
+                          print("\n\n ####");
+                          print(result.length.toString());
+                          if (result.length != 0) {
+                            Navigator.pop(context);
+
+                            _displayAlertDialog(
+                              context,
+                              result,
+                              refresh,
+                              _cleanMarkers,
+                              changeZoomTo_14,
+                              changeZoomTo_12,
+                              changeZoomTo_11,
+                            );
+                            isAppWorking = false;
+                          } else {
+                            Navigator.pop(context);
+                            isAppWorking = false;
+                            print("\n\n ## display NO FOUND ##");
+                            showAlertDialog_NoHitsFound(context);
+                          }
                         } else {
-                          Navigator.pop(context);
-                          isAppWorking = false;
-                          print("\n\n ## display NO FOUND ##");
-                          showAlertDialog_NoHitsFound(context);
+                          print("\n App is working !!");
                         }
                       } else {
-                        print("\n App is working !!");
+                        hasNetwork = false;
+                        showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: Text("Oops!"),
+                                content: Text(
+                                    "You appear to be offline, this app requires an internet connection"),
+                              );
+                            });
                       }
-                    } else {
-                      hasNetwork = false;
-                      showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              title: Text("Oops!"),
-                              content: Text(
-                                  "You appear to be offline, this app requires an internet connection"),
-                            );
-                          });
-                    }
-                  },
-                  // child: Container(
-                  //   height: 70,
-                  //   width: 70,
-                  //   // color: Colors.red,
-                  //   decoration: BoxDecoration(
-                  //     image: DecorationImage(
-                  //       image: AssetImage(Auxstrings.iconMacDonalds004),
-                  //       fit: BoxFit.contain,
-                  //     ),
-                  //     shape: BoxShape.circle,
-                  //   ),
-                  // ),
-                  child: SvgPicture.asset(
-                    Auxstrings.iconMacDonalds005,
-                    color: Colors.black,
-                    matchTextDirection: true,
-                    fit: BoxFit.contain,
-                    semanticsLabel: "aaaa",
-                    height: 50,
-                    width: 50,
+                    },
+                    // child: Container(
+                    //   height: 70,
+                    //   width: 70,
+                    //   // color: Colors.red,
+                    //   decoration: BoxDecoration(
+                    //     image: DecorationImage(
+                    //       image: AssetImage(Auxstrings.iconMacDonalds004),
+                    //       fit: BoxFit.contain,
+                    //     ),
+                    //     shape: BoxShape.circle,
+                    //   ),
+                    // ),
+                    child: SvgPicture.asset(
+                      Auxstrings.iconMacDonalds005,
+                      color: Colors.black,
+                      matchTextDirection: true,
+                      fit: BoxFit.contain,
+                      semanticsLabel: "aaaa",
+                      height: 50,
+                      width: 50,
+                    ),
                   ),
                 ),
-              ),
-              markers.length == 0 || markers.isEmpty
-                  ? Container()
-                  : Positioned(
-                      bottom: 100,
-                      left: 10,
-                      child: GestureDetector(
-                        onTap: () async {
-                          print("\n ## TAPPED - clean markers ##");
-                          _cleanMarkers();
-                        },
-                        child: Container(
-                          height: 50,
-                          width: 50,
-                          // color: Colors.green,
-                          decoration: BoxDecoration(
-                              color: Colors.purple,
-                              border: Border.all(
+                markers.length == 0 || markers.isEmpty
+                    ? Container()
+                    : Positioned(
+                        bottom: 100,
+                        left: 10,
+                        child: GestureDetector(
+                          onTap: () async {
+                            print("\n ## TAPPED - clean markers ##");
+                            _cleanMarkers();
+                          },
+                          child: Container(
+                            height: 50,
+                            width: 50,
+                            // color: Colors.green,
+                            decoration: BoxDecoration(
                                 color: Colors.purple,
-                              ),
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(10))),
-                          child: Icon(
-                            Icons.refresh,
-                            color: Colors.white,
+                                border: Border.all(
+                                  color: Colors.purple,
+                                ),
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(10))),
+                            child: Icon(
+                              Icons.refresh,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ),
-                    ),
 
-              // Positioned(
-              //   bottom: 100,
-              //   left: 10,
-              //   child: GestureDetector(
-              //     onTap: () async {
-              //       print("\n ## TAPPED - Green Container ##");
-              //       _addMarker(latLng01);
-              //     },
-              //     child: Container(
-              //       height: 50,
-              //       width: 50,
-              //       color: Colors.green,
-              //     ),
-              //   ),
-              // ),
-              // Positioned(
-              //   bottom: 180,
-              //   left: 10,
-              //   child: GestureDetector(
-              //     onTap: () async {
-              //       print("\n ## TAPPED - Yellow Container ##");
-              //       // _cleanMarkers();
-              //       MapUtils.openMap(-3.823216, -38.481700);
-              //     },
-              //     child: Container(
-              //       height: 50,
-              //       width: 50,
-              //       color: Colors.yellow,
-              //     ),
-              //   ),
-              // ),
-              // Positioned(
-              //   bottom: 250,
-              //   left: 10,
-              //   child: GestureDetector(
-              //     onTap: () async {
-              //       print("\n ## TAPPED - Orange Container ##");
-              //       currentZoom -= 1;
-              //       changeZoom(currentZoom);
-              //     },
-              //     child: Container(
-              //       height: 50,
-              //       width: 50,
-              //       color: Colors.orange,
-              //     ),
-              //   ),
-              // ),
-              // Positioned(
-              //   bottom: 330,
-              //   left: 10,
-              //   child: GestureDetector(
-              //     onTap: () async {
-              //       print("\n ## TAPPED - Purple Container ##");
-              //       currentZoom += 1;
-              //       changeZoom(currentZoom);
-              //     },
-              //     child: Container(
-              //       height: 50,
-              //       width: 50,
-              //       color: Colors.purple,
-              //     ),
-              //   ),
-              // ),
-              // Positioned(
-              //   bottom: 400,
-              //   left: 10,
-              //   child: GestureDetector(
-              //     onTap: () async {
-              //       print("\n ## TAPPED - Pink Container ##");
+                // Positioned(
+                //   bottom: 100,
+                //   left: 10,
+                //   child: GestureDetector(
+                //     onTap: () async {
+                //       print("\n ## TAPPED - Green Container ##");
+                //       _addMarker(latLng01);
+                //     },
+                //     child: Container(
+                //       height: 50,
+                //       width: 50,
+                //       color: Colors.green,
+                //     ),
+                //   ),
+                // ),
+                // Positioned(
+                //   bottom: 180,
+                //   left: 10,
+                //   child: GestureDetector(
+                //     onTap: () async {
+                //       print("\n ## TAPPED - Yellow Container ##");
+                //       // _cleanMarkers();
+                //       MapUtils.openMap(-3.823216, -38.481700);
+                //     },
+                //     child: Container(
+                //       height: 50,
+                //       width: 50,
+                //       color: Colors.yellow,
+                //     ),
+                //   ),
+                // ),
+                // Positioned(
+                //   bottom: 250,
+                //   left: 10,
+                //   child: GestureDetector(
+                //     onTap: () async {
+                //       print("\n ## TAPPED - Orange Container ##");
+                //       currentZoom -= 1;
+                //       changeZoom(currentZoom);
+                //     },
+                //     child: Container(
+                //       height: 50,
+                //       width: 50,
+                //       color: Colors.orange,
+                //     ),
+                //   ),
+                // ),
+                // Positioned(
+                //   bottom: 330,
+                //   left: 10,
+                //   child: GestureDetector(
+                //     onTap: () async {
+                //       print("\n ## TAPPED - Purple Container ##");
+                //       currentZoom += 1;
+                //       changeZoom(currentZoom);
+                //     },
+                //     child: Container(
+                //       height: 50,
+                //       width: 50,
+                //       color: Colors.purple,
+                //     ),
+                //   ),
+                // ),
+                // Positioned(
+                //   bottom: 400,
+                //   left: 10,
+                //   child: GestureDetector(
+                //     onTap: () async {
+                //       print("\n ## TAPPED - Pink Container ##");
 
-              //       // changeZoom(9);
-              //       changeZoomTo_12();
-              //     },
-              //     child: Container(
-              //       height: 50,
-              //       width: 50,
-              //       color: Colors.pink,
-              //     ),
-              //   ),
-              // ),
-              // Positioned(
-              //   bottom: 480,
-              //   left: 10,
-              //   child: GestureDetector(
-              //     onTap: () async {
-              //       print("\n ## TAPPED - black Container ##");
+                //       // changeZoom(9);
+                //       changeZoomTo_12();
+                //     },
+                //     child: Container(
+                //       height: 50,
+                //       width: 50,
+                //       color: Colors.pink,
+                //     ),
+                //   ),
+                // ),
+                // Positioned(
+                //   bottom: 480,
+                //   left: 10,
+                //   child: GestureDetector(
+                //     onTap: () async {
+                //       print("\n ## TAPPED - black Container ##");
 
-              //       print("\n ## The rangeRadius is:" + rangeRadius.toString());
-              //       print("\n ## The currentZoom is:" + currentZoom.toString());
-              //     },
-              //     child: Container(
-              //       height: 50,
-              //       width: 50,
-              //       color: Colors.black,
-              //     ),
-              //   ),
-              // ),
-              Positioned(
-                  bottom: 30,
-                  left: 60,
-                  child: Theme(
-                    data: Theme.of(context).copyWith(
-                      colorScheme: ColorScheme.fromSwatch().copyWith(
-                        onSurface: Colors.purple.withOpacity(0.3),
-                        onPrimary: Colors.black,
-                        // secondary: Colors.grey,
-                        // background: Colors.grey,
-                        // onBackground: Colors.orange,
-                        // onSecondary: Colors.purple,
-                        // primary: Colors.white,
-                        // primaryVariant: Colors.yellow,
-                        // secondaryVariant: Colors.red,
+                //       print("\n ## The rangeRadius is:" + rangeRadius.toString());
+                //       print("\n ## The currentZoom is:" + currentZoom.toString());
+                //     },
+                //     child: Container(
+                //       height: 50,
+                //       width: 50,
+                //       color: Colors.black,
+                //     ),
+                //   ),
+                // ),
+                Positioned(
+                    bottom: 30,
+                    left: 60,
+                    child: Theme(
+                      data: Theme.of(context).copyWith(
+                        colorScheme: ColorScheme.fromSwatch().copyWith(
+                          onSurface: Colors.purple.withOpacity(0.3),
+                          onPrimary: Colors.black,
+                          // secondary: Colors.grey,
+                          // background: Colors.grey,
+                          // onBackground: Colors.orange,
+                          // onSecondary: Colors.purple,
+                          // primary: Colors.white,
+                          // primaryVariant: Colors.yellow,
+                          // secondaryVariant: Colors.red,
+                        ),
                       ),
+                      child: Slider(
+                        key: keyBottomNavigation2,
+                        value: sliderVal,
+                        onChanged: (value) {
+                          setState(() {
+                            sliderVal = value;
+                            rangeRadius = value;
+
+                            circles.clear();
+                            circles.add(Circle(
+                              circleId: CircleId('rangeRadius'),
+                              center: LatLng(local.lat, local.long),
+                              radius: rangeRadius,
+                              fillColor: Colors.purple.withOpacity(0.3),
+                              strokeWidth: 1,
+                            ));
+                            if (rangeRadius == 1500) {
+                              changeZoomTo_14();
+                            } else if (rangeRadius <= 5000) {
+                              changeZoomTo_12();
+                            } else {
+                              changeZoomTo_11();
+                            }
+                          });
+                        },
+                        min: 1500,
+                        max: 10000,
+                        activeColor: Colors.purple,
+                        inactiveColor: Colors.purple[100],
+                        // label: sliderVal.round().toString() + " Meters",
+                        label: (sliderVal / 1000.0).toStringAsFixed(1) + " km",
+
+                        divisions: 17,
+                      ),
+                    )),
+
+                //   Slider(
+                //   value: val,
+                //   onChanged: (value) {
+                //     setState(() {
+                //       val = value;
+                //     });
+                //   },
+                //   min: 0,
+                //   max: 10,
+                //   activeColor: Colors.green,
+                //   inactiveColor: Colors.green[100],
+                //   label: val.round().toString(),
+                //   divisions: 10,
+                // )
+              ],
+            );
+          }),
+        ),
+        floatingActionButton: Padding(
+          padding: const EdgeInsets.only(top: 100.0),
+          child: Container(
+            height: 100,
+            width: 120,
+            child: FittedBox(
+              child: Opacity(
+                opacity: 0.9,
+                child: new FloatingActionButton.extended(
+                  label: Text(
+                    (rangeRadius / 1000.0).toStringAsFixed(1) + " km",
+                    style: TextStyle(
+                      color: Colors.white,
                     ),
-                    child: Slider(
-                      value: sliderVal,
-                      onChanged: (value) {
-                        setState(() {
-                          sliderVal = value;
-                          rangeRadius = value;
-
-                          circles.clear();
-                          circles.add(Circle(
-                            circleId: CircleId('rangeRadius'),
-                            center: LatLng(local.lat, local.long),
-                            radius: rangeRadius,
-                            fillColor: Colors.purple.withOpacity(0.3),
-                            strokeWidth: 1,
-                          ));
-                          if (rangeRadius == 1500) {
-                            changeZoomTo_14();
-                          } else if (rangeRadius <= 5000) {
-                            changeZoomTo_12();
-                          } else {
-                            changeZoomTo_11();
-                          }
-                        });
-                      },
-                      min: 1500,
-                      max: 10000,
-                      activeColor: Colors.purple,
-                      inactiveColor: Colors.purple[100],
-                      // label: sliderVal.round().toString() + " Meters",
-                      label: (sliderVal / 1000.0).toStringAsFixed(1) + " km",
-
-                      divisions: 17,
-                    ),
-                  )),
-
-              //   Slider(
-              //   value: val,
-              //   onChanged: (value) {
-              //     setState(() {
-              //       val = value;
-              //     });
-              //   },
-              //   min: 0,
-              //   max: 10,
-              //   activeColor: Colors.green,
-              //   inactiveColor: Colors.green[100],
-              //   label: val.round().toString(),
-              //   divisions: 10,
-              // )
-            ],
-          );
-        }),
-      ),
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(top: 100.0),
-        child: Container(
-          height: 100,
-          width: 120,
-          child: FittedBox(
-            child: Opacity(
-              opacity: 0.9,
-              child: new FloatingActionButton.extended(
-                label: Text(
-                  (rangeRadius / 1000.0).toStringAsFixed(1) + " km",
-                  style: TextStyle(
-                    color: Colors.white,
                   ),
+                  heroTag: 'displayDistance',
+                  elevation: 0.0,
+
+                  // backgroundColor: Auxstrings.mainAppThemeColor02,
+                  backgroundColor: Colors.black,
+
+                  onPressed: () {},
                 ),
-                heroTag: 'displayDistance',
-                elevation: 0.0,
-
-                // backgroundColor: Auxstrings.mainAppThemeColor02,
-                backgroundColor: Colors.black,
-
-                onPressed: () {},
               ),
             ),
           ),
         ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.miniCenterTop,
-    );
+        floatingActionButtonLocation:
+            FloatingActionButtonLocation.miniCenterTop);
   }
 }
 

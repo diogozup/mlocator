@@ -1,0 +1,9 @@
+{
+destination_addresses:  [Alameda Dr. Mariano Felgueiras 238, 4835-039 Guimarães, Portugal],
+origin_addresses:       [R. Prof. Egas Moniz 465, 4810 Costa, Portugal],
+rows: [{
+    elements: [{
+        distance: {text: 4.1 mi, value: 6541},
+        duration: {text: 8 mins, value: 462}, 
+        status: OK}]}],
+        status: OK}
