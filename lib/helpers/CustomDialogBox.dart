@@ -22,6 +22,8 @@ class CustomDialogBox extends StatefulWidget {
   final Function() cameraUpdate_01;
   final Function() cameraUpdate_02;
   final Function() cameraUpdate_03;
+  final Function() cameraUpdate_04;
+  final Function() cameraUpdate_05;
 
   const CustomDialogBox({
     Key? key,
@@ -36,6 +38,8 @@ class CustomDialogBox extends StatefulWidget {
     required this.cameraUpdate_01,
     required this.cameraUpdate_02,
     required this.cameraUpdate_03,
+    required this.cameraUpdate_04,
+    required this.cameraUpdate_05,
   }) : super(key: key);
 
   @override
@@ -259,12 +263,23 @@ class _CustomDialogBoxState extends State<CustomDialogBox> {
 
     widget.notifyParent();
     //!-- CHANGE THE ZOOM LEVEL ACCOUTING THE RADIUS OF THE QUERY HERE!
-    if (rangeRadius == 1500) {
+    // if (rangeRadius == 1500) {
+    //   widget.cameraUpdate_01();
+    // } else if (rangeRadius <= 5000) {
+    //   widget.cameraUpdate_02();
+    // } else {
+    //   widget.cameraUpdate_03();
+    // }
+    if (rangeRadius >= 500 && rangeRadius < 1500) {
       widget.cameraUpdate_01();
-    } else if (rangeRadius <= 5000) {
+    } else if (rangeRadius >= 1500 && rangeRadius <= 3000) {
       widget.cameraUpdate_02();
-    } else {
+    } else if (rangeRadius > 3000 && rangeRadius <= 5000) {
       widget.cameraUpdate_03();
+    } else if (rangeRadius > 5000 && rangeRadius <= 10000) {
+      widget.cameraUpdate_04();
+    } else if (rangeRadius > 10000 && rangeRadius <= 20000) {
+      widget.cameraUpdate_05();
     }
   }
 
@@ -337,7 +352,7 @@ class _CustomDialogBoxState extends State<CustomDialogBox> {
                   ),
                 ],
               ),
-              SizedBox(
+              const SizedBox(
                 height: 12,
               ),
               Align(

@@ -11,6 +11,7 @@ import 'package:mlocator/helpers/MapUtils.dart';
 import 'package:mlocator/pages/tutorial.dart';
 import 'package:mlocator/services/nearby_location_api.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 import 'package:uuid/uuid.dart';
 
@@ -18,7 +19,7 @@ final appKey = GlobalKey();
 bool isAppWorking = false;
 double rangeRadius = 3500;
 late BitmapDescriptor customIcon;
-double currentZoom = 10.0;
+double currentZoom = 12.0;
 int getUserLocationStatus = -1;
 bool isAnimatedTextDisplayed = false;
 
@@ -33,6 +34,19 @@ class PostosPage extends StatefulWidget {
 class _PostosPageState extends State<PostosPage> {
   double sliderVal = 1500.0;
   bool hasNetwork = false;
+
+  final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+  late int _counter;
+
+  Future<int> _incrementCounter() async {
+    final SharedPreferences prefs = await _prefs;
+    final int counter = (prefs.getInt('counter') ?? 0) + 1;
+
+    prefs.setInt('counter', counter).then((bool success) {
+      return counter;
+    });
+    return counter;
+  }
 
   late TutorialCoachMark tutorialCoachMark;
   List<TargetFocus> targets = <TargetFocus>[];
@@ -75,21 +89,24 @@ class _PostosPageState extends State<PostosPage> {
                 align: ContentAlign.bottom,
                 child: Container(
                   child: Column(
-                    mainAxisSize: MainAxisSize.max,
+                    mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
+                    children: const <Widget>[
                       Text(
-                        "Titulo lorem ipsum",
+                        "You can always check this tutorial",
                         style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
                             fontSize: 20.0),
                       ),
                       Padding(
-                        padding: const EdgeInsets.only(top: 10.0),
+                        padding: EdgeInsets.only(top: 10.0),
                         child: Text(
-                          "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin pulvinar tortor eget maximus iaculis.",
-                          style: TextStyle(color: Colors.white),
+                          "This simple tutorial will help you to know how to use the app!",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16.0,
+                          ),
                         ),
                       )
                     ],
@@ -106,27 +123,28 @@ class _PostosPageState extends State<PostosPage> {
                 align: ContentAlign.top,
                 child: Padding(
                   padding: const EdgeInsets.only(bottom: 100.0),
-                  child: Container(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: <Widget>[
-                        Text(
-                          "Titulo lorem ipsum",
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: const <Widget>[
+                      Text(
+                        "Step - 1",
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            fontSize: 20.0),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(top: 10.0),
+                        child: Text(
+                          "Choose a radius that you want to search for nearby McDonald's Restaurants",
                           style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                              fontSize: 20.0),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(top: 10.0),
-                          child: Text(
-                            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin pulvinar tortor eget maximus iaculis.",
-                            style: TextStyle(color: Colors.white),
+                            color: Colors.white,
+                            fontSize: 16.0,
                           ),
-                        )
-                      ],
-                    ),
+                        ),
+                      )
+                    ],
                   ),
                 ))
           ]),
@@ -143,19 +161,19 @@ class _PostosPageState extends State<PostosPage> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
+                    children: const <Widget>[
                       Text(
-                        "Titulo lorem ipsum",
+                        "Step - 2",
                         style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
                             fontSize: 20.0),
                       ),
                       Padding(
-                        padding: const EdgeInsets.only(top: 10.0),
+                        padding: EdgeInsets.only(top: 10.0),
                         child: Text(
-                          "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin pulvinar tortor eget maximus iaculis.",
-                          style: TextStyle(color: Colors.white),
+                          "Click here to get all the nearby McDonald's Restaurants that are currently open and ready to serve you!",
+                          style: TextStyle(color: Colors.white, fontSize: 16.0),
                         ),
                       )
                     ],
@@ -287,6 +305,14 @@ class _PostosPageState extends State<PostosPage> {
         zoom: 15.0)));
   }
 
+  changeZoomTo_16() {
+    print("\n ## Change Zoom Value to 16! ##");
+    mapsController.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
+        target:
+            LatLng(CurrentUserPosition.latitude, CurrentUserPosition.longitude),
+        zoom: 16.0)));
+  }
+
   refresh() {
     setState(() {});
   }
@@ -363,7 +389,7 @@ class _PostosPageState extends State<PostosPage> {
       Circle(
         circleId: CircleId('rangeRadius'),
         center: LatLng(lat, lng),
-        radius: rangeRadius,
+        radius: rangeRadius + 200,
         fillColor: Colors.purple.withOpacity(0.3),
         strokeWidth: 1,
       ),
@@ -434,8 +460,14 @@ class _PostosPageState extends State<PostosPage> {
     pattern.allMatches(text).forEach((match) => print(match.group(0)));
   }
 
-  _displayTutorialIfFirstTimeAppIsOpened() {
+  _displayTutorialIfFirstTimeAppIsOpened() async {
     printColor(Auxstrings.colorRed, "INIT STAT GOOGLE MAPS SHOW TUTORIAL");
+    int count = await _incrementCounter();
+    print("#### NUM TIMES IS APP OPENED THIS MAP SCREEN ### - " +
+        count.toString());
+    if (count == 1) {
+      Future.delayed(Duration.zero, showTutorial);
+    }
   }
 
   @override
@@ -463,18 +495,18 @@ class _PostosPageState extends State<PostosPage> {
                 gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
-                    colors: <Color>[Colors.purple, Colors.black])),
+                    colors: const <Color>[Colors.purple, Colors.black])),
           ),
           actions: [
-            IconButton(
-              icon: Icon(
-                Icons.info_outline,
-                color: Colors.white,
-              ),
-              onPressed: () {
-                Future.delayed(Duration.zero, showTutorial);
-              },
-            ),
+            // IconButton(
+            //   icon: Icon(
+            //     Icons.info_outline,
+            //     color: Colors.white,
+            //   ),
+            //   onPressed: () {
+            //     Future.delayed(Duration.zero, showTutorial);
+            //   },
+            // ),
             IconButton(
               key: keyBottomNavigation1,
               icon: Icon(
@@ -610,8 +642,10 @@ class _PostosPageState extends State<PostosPage> {
                               refresh,
                               _cleanMarkers,
                               changeZoomTo_14,
+                              changeZoomTo_13,
                               changeZoomTo_12,
                               changeZoomTo_11,
+                              changeZoomTo_10,
                             );
                             isAppWorking = false;
                           } else {
@@ -818,17 +852,25 @@ class _PostosPageState extends State<PostosPage> {
                               fillColor: Colors.purple.withOpacity(0.3),
                               strokeWidth: 1,
                             ));
-                            if (rangeRadius == 1500) {
+                            if (rangeRadius >= 500 && rangeRadius < 1500) {
                               changeZoomTo_14();
-                            } else if (rangeRadius <= 5000) {
+                            } else if (rangeRadius >= 1500 &&
+                                rangeRadius <= 3000) {
+                              changeZoomTo_13();
+                            } else if (rangeRadius > 3000 &&
+                                rangeRadius <= 5000) {
                               changeZoomTo_12();
-                            } else {
+                            } else if (rangeRadius > 5000 &&
+                                rangeRadius <= 10000) {
                               changeZoomTo_11();
+                            } else if (rangeRadius > 10000 &&
+                                rangeRadius <= 20000) {
+                              changeZoomTo_10();
                             }
                           });
                         },
-                        min: 1500,
-                        max: 10000,
+                        min: 500,
+                        max: 20000,
                         activeColor: Colors.purple,
                         inactiveColor: Colors.purple[100],
                         // label: sliderVal.round().toString() + " Meters",
@@ -864,10 +906,10 @@ class _PostosPageState extends State<PostosPage> {
             child: FittedBox(
               child: Opacity(
                 opacity: 0.9,
-                child: new FloatingActionButton.extended(
+                child: FloatingActionButton.extended(
                   label: Text(
                     (rangeRadius / 1000.0).toStringAsFixed(1) + " km",
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.white,
                     ),
                   ),
@@ -893,8 +935,10 @@ Widget setupAlertDialoadContainer(
   dynamic refresh,
   dynamic cleanMarkers,
   dynamic changeZoomTo_14,
+  dynamic changeZoomTo_13,
   dynamic changeZoomTo_12,
   dynamic changeZoomTo_11,
+  dynamic changeZoomTo_10,
 ) {
   return Container(
     height: 300.0,
@@ -941,8 +985,10 @@ Widget setupAlertDialoadContainer(
                           notifyParent: refresh,
                           cleanMarkers: cleanMarkers,
                           cameraUpdate_01: changeZoomTo_14,
-                          cameraUpdate_02: changeZoomTo_12,
-                          cameraUpdate_03: changeZoomTo_11,
+                          cameraUpdate_02: changeZoomTo_13,
+                          cameraUpdate_03: changeZoomTo_12,
+                          cameraUpdate_04: changeZoomTo_11,
+                          cameraUpdate_05: changeZoomTo_10,
                         );
                       });
                 },
@@ -959,8 +1005,10 @@ void _displayAlertDialog(
   dynamic refresh,
   dynamic cleanMarkers,
   dynamic changeZoomTo_14,
+  dynamic changeZoomTo_13,
   dynamic changeZoomTo_12,
   dynamic changeZoomTo_11,
+  dynamic changeZoomTo_10,
 ) {
   showDialog(
       context: context,
@@ -972,8 +1020,10 @@ void _displayAlertDialog(
             refresh,
             cleanMarkers,
             changeZoomTo_14,
+            changeZoomTo_13,
             changeZoomTo_12,
             changeZoomTo_11,
+            changeZoomTo_10,
           ),
         );
       });

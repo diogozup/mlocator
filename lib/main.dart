@@ -6,6 +6,7 @@ import 'package:mlocator/helpers/AuxiliarStrings.dart';
 import 'package:mlocator/repositories/postos_repository.dart';
 import 'package:mlocator/pages/postos_page.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -43,17 +44,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    // _getLocationPermission();
   }
-
-  // void _getLocationPermission() async {
-  //   var location = new Location();
-  //   try {
-  //     location.requestPermission();
-  //   } on Exception catch (_) {
-  //     print('There was a problem allowing location access');
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -63,6 +54,15 @@ class _MyHomePageState extends State<MyHomePage> {
           'McFinder',
           style: TextStyle(color: Colors.white),
         ),
+        // actions: [
+        //   IconButton(
+        //     icon: Icon(
+        //       Icons.info_outline,
+        //       color: Colors.white,
+        //     ),
+        //     onPressed: () async {},
+        //   ),
+        // ],
         // backgroundColor: Colors.purple,
         flexibleSpace: Container(
           decoration: BoxDecoration(
