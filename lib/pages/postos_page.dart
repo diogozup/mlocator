@@ -1,6 +1,7 @@
 import 'dart:io';
-
+import 'package:mlocator/ui/constants/map_key.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -262,7 +263,7 @@ class _PostosPageState extends State<PostosPage> {
     mapsController.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
         target:
             LatLng(CurrentUserPosition.latitude, CurrentUserPosition.longitude),
-        zoom: 10.0)));
+        zoom: 09.0)));
   }
 
   changeZoomTo_11() {
@@ -270,7 +271,7 @@ class _PostosPageState extends State<PostosPage> {
     mapsController.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
         target:
             LatLng(CurrentUserPosition.latitude, CurrentUserPosition.longitude),
-        zoom: 11.0)));
+        zoom: 10.0)));
   }
 
   changeZoomTo_12() {
@@ -278,7 +279,7 @@ class _PostosPageState extends State<PostosPage> {
     mapsController.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
         target:
             LatLng(CurrentUserPosition.latitude, CurrentUserPosition.longitude),
-        zoom: 12.0)));
+        zoom: 10.0)));
   }
 
   changeZoomTo_13() {
@@ -286,7 +287,7 @@ class _PostosPageState extends State<PostosPage> {
     mapsController.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
         target:
             LatLng(CurrentUserPosition.latitude, CurrentUserPosition.longitude),
-        zoom: 13.0)));
+        zoom: 11.0)));
   }
 
   changeZoomTo_14() {
@@ -294,7 +295,7 @@ class _PostosPageState extends State<PostosPage> {
     mapsController.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
         target:
             LatLng(CurrentUserPosition.latitude, CurrentUserPosition.longitude),
-        zoom: 14.0)));
+        zoom: 12.0)));
   }
 
   changeZoomTo_15() {
@@ -389,7 +390,7 @@ class _PostosPageState extends State<PostosPage> {
       Circle(
         circleId: CircleId('rangeRadius'),
         center: LatLng(lat, lng),
-        radius: rangeRadius + 200,
+        radius: rangeRadius + 2500,
         fillColor: Colors.purple.withOpacity(0.3),
         strokeWidth: 1,
       ),
@@ -930,7 +931,45 @@ class _PostosPageState extends State<PostosPage> {
   }
 }
 
+_getAllDistances(List results) async {
+  List<String> travelTimes = [];
+  List<String> distances = [];
+  // Map<String, String> markerMetaData = {};
+  List<Map<String, String>> markerMetaDataList = [];
+  Dio dio = new Dio();
+  for (int index = 0; index < results.length; index++) {
+    Response response = await dio.get(
+        "https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=${CurrentUserPosition.latitude},${CurrentUserPosition.longitude}&destinations=${results[index]['geometry']['location']['lat']},${results[index]['geometry']['location']['lng']}&key=${MapKey.apiKeyDistanceMatrix}");
+    //?- distance
+    String distanceInMiles =
+        response.data["rows"][0]["elements"][0]["distance"]["text"];
+    distanceInMiles = distanceInMiles.substring(0, distanceInMiles.length - 3);
+    // print("DISTANCE IN MILES: " + distanceInMiles);
+    double distanceInKM = (double.parse(distanceInMiles) * 1.60934);
+    String distanceInKMString = distanceInKM.toStringAsFixed(1);
+
+    //?- travelTime
+    String travelTime =
+        response.data["rows"][0]["elements"][0]["duration"]["text"];
+    double travelTimeInMinutes =
+        double.parse(travelTime.substring(0, travelTime.length - 4));
+
+    distances.add(distanceInKMString);
+    travelTimes.add(travelTimeInMinutes.toString());
+    Map<String, String> markerMetaData = {
+      "distanceInKMString": distanceInKMString,
+      "travelTimeInMinutes": travelTimeInMinutes.toString()
+    };
+
+    markerMetaDataList.add(markerMetaData);
+  }
+  // return distances;
+  return markerMetaDataList;
+}
+
 Widget setupAlertDialoadContainer(
+  // List<String> distances,
+  List<Map<String, String>> markerMetaDataList,
   List results,
   dynamic refresh,
   dynamic cleanMarkers,
@@ -947,6 +986,11 @@ Widget setupAlertDialoadContainer(
       shrinkWrap: true,
       itemCount: results.length,
       itemBuilder: (BuildContext context, int index) {
+        var var1 = markerMetaDataList[index]["distanceInKMString"];
+        Text text1 = Text("Distance: " + var1! + " km");
+        var var2 = markerMetaDataList[index]["travelTimeInMinutes"];
+        Text text2 = Text("Duration: " + var2! + " min");
+
         return results[index]['name'] == "McDonald's" &&
                 results[index]['opening_hours']['open_now'] == true
             ? ListTile(
@@ -954,8 +998,18 @@ Widget setupAlertDialoadContainer(
                   radius: 30.0,
                   backgroundImage: AssetImage(Auxstrings.iconMacDonalds004),
                 ),
-                title: Text(results[index]['name']),
-                subtitle: Text(results[index]['vicinity']),
+                title: text1,
+                subtitle: text2,
+                // title: Text(
+                //     markerMetaDataList[index]['distanceInKMString'] ?? "0.0"),
+                // subtitle: Text(
+                //     markerMetaDataList[index]['travelTimeInMinutes'] ?? "0.0"),
+
+                // subtitle: Text(results[index]['vicinity']),
+                // trailing: Text(
+                //   distances[index].toString() + " km",
+                //   style: TextStyle(color: Colors.purple),
+                // ),
                 onTap: () {
                   print(results[index]['place_id']);
                   print(results[index]['geometry']['location']['lat']);
@@ -999,7 +1053,7 @@ Widget setupAlertDialoadContainer(
   );
 }
 
-void _displayAlertDialog(
+Future<void> _displayAlertDialog(
   BuildContext context,
   List results,
   dynamic refresh,
@@ -1009,13 +1063,18 @@ void _displayAlertDialog(
   dynamic changeZoomTo_12,
   dynamic changeZoomTo_11,
   dynamic changeZoomTo_10,
-) {
+) async {
+  // List<String> distances = await _getAllDistances(results);
+  List<Map<String, String>> markerMetaDataList =
+      await _getAllDistances(results);
   showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Opened Now!'),
           content: setupAlertDialoadContainer(
+            // distances,
+            markerMetaDataList,
             results,
             refresh,
             cleanMarkers,
