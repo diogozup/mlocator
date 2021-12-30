@@ -1,0 +1,26 @@
+# This is a generated file; do not edit or check into version control.
+flutter_config=/home/zup/snap/flutter/common/flutter/.pub-cache/hosted/pub.dartlang.org/flutter_config-2.0.0/
+flutter_plugin_android_lifecycle=/home/zup/snap/flutter/common/flutter/.pub-cache/hosted/pub.dartlang.org/flutter_plugin_android_lifecycle-2.0.4/
+geolocator=/home/zup/snap/flutter/common/flutter/.pub-cache/hosted/pub.dartlang.org/geolocator-7.7.1/
+geolocator_android=/home/zup/snap/flutter/common/flutter/.pub-cache/hosted/pub.dartlang.org/geolocator_android-2.1.0/
+geolocator_apple=/home/zup/snap/flutter/common/flutter/.pub-cache/hosted/pub.dartlang.org/geolocator_apple-1.2.2/
+geolocator_web=/home/zup/snap/flutter/common/flutter/.pub-cache/hosted/pub.dartlang.org/geolocator_web-2.0.6/
+google_maps_flutter=/home/zup/snap/flutter/common/flutter/.pub-cache/hosted/pub.dartlang.org/google_maps_flutter-2.1.0/
+location=/home/zup/snap/flutter/common/flutter/.pub-cache/hosted/pub.dartlang.org/location-4.3.0/
+location_web=/home/zup/snap/flutter/common/flutter/.pub-cache/hosted/pub.dartlang.org/location_web-3.1.1/
+path_provider_linux=/home/zup/snap/flutter/common/flutter/.pub-cache/hosted/pub.dartlang.org/path_provider_linux-2.1.4/
+path_provider_windows=/home/zup/snap/flutter/common/flutter/.pub-cache/hosted/pub.dartlang.org/path_provider_windows-2.0.4/
+shared_preferences=/home/zup/snap/flutter/common/flutter/.pub-cache/hosted/pub.dartlang.org/shared_preferences-2.0.11/
+shared_preferences_android=/home/zup/snap/flutter/common/flutter/.pub-cache/hosted/pub.dartlang.org/shared_preferences_android-2.0.9/
+shared_preferences_ios=/home/zup/snap/flutter/common/flutter/.pub-cache/hosted/pub.dartlang.org/shared_preferences_ios-2.0.8/
+shared_preferences_linux=/home/zup/snap/flutter/common/flutter/.pub-cache/hosted/pub.dartlang.org/shared_preferences_linux-2.0.3/
+shared_preferences_macos=/home/zup/snap/flutter/common/flutter/.pub-cache/hosted/pub.dartlang.org/shared_preferences_macos-2.0.2/
+shared_preferences_web=/home/zup/snap/flutter/common/flutter/.pub-cache/hosted/pub.dartlang.org/shared_preferences_web-2.0.2/
+shared_preferences_windows=/home/zup/snap/flutter/common/flutter/.pub-cache/hosted/pub.dartlang.org/shared_preferences_windows-2.0.3/
+url_launcher=/home/zup/snap/flutter/common/flutter/.pub-cache/hosted/pub.dartlang.org/url_launcher-6.0.17/
+url_launcher_android=/home/zup/snap/flutter/common/flutter/.pub-cache/hosted/pub.dartlang.org/url_launcher_android-6.0.13/
+url_launcher_ios=/home/zup/snap/flutter/common/flutter/.pub-cache/hosted/pub.dartlang.org/url_launcher_ios-6.0.13/
+url_launcher_linux=/home/zup/snap/flutter/common/flutter/.pub-cache/hosted/pub.dartlang.org/url_launcher_linux-2.0.2/
+url_launcher_macos=/home/zup/snap/flutter/common/flutter/.pub-cache/hosted/pub.dartlang.org/url_launcher_macos-2.0.2/
+url_launcher_web=/home/zup/snap/flutter/common/flutter/.pub-cache/hosted/pub.dartlang.org/url_launcher_web-2.0.5/
+url_launcher_windows=/home/zup/snap/flutter/common/flutter/.pub-cache/hosted/pub.dartlang.org/url_launcher_windows-2.0.2/

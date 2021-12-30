@@ -1,0 +1,4 @@
+io/flutter/plugins/GeneratedPluginRegistrant.java
+ io.flutter.plugins.GeneratedPluginRegistrant
+com/pandapanda/mlocator/mlocator/BuildConfig.java
+ com.pandapanda.mlocator.mlocator.BuildConfig

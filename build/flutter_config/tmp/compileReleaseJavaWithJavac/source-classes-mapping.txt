@@ -1,0 +1,2 @@
+com/byneapp/flutter_config/BuildConfig.java
+ com.byneapp.flutter_config.BuildConfig
